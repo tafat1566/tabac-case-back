@@ -1,0 +1,121 @@
+produit_index:
+    path: /produits
+    controller: 'App\Controller\ProduitController::index'
+    methods: [GET]
+
+produit_create:
+    path: /produits
+    controller: 'App\Controller\ProduitController::create'
+    methods: [POST]
+
+produit_show:
+    path: /produits/{id}
+    controller: 'App\Controller\ProduitController::show'
+    methods: [GET]
+
+produit_update:
+    path: /produits/{id}
+    controller: 'App\Controller\ProduitController::update'
+    methods: [PUT]
+
+produit_delete:
+    path: /produits/{id}
+    controller: 'App\Controller\ProduitController::delete'
+    methods: [DELETE]
+
+vente_index:
+    path: /ventes
+    controller: 'App\Controller\VenteController::index'
+    methods: [GET]
+
+vente_create:
+    path: /ventes
+    controller: 'App\Controller\VenteController::create'
+    methods: [POST]
+
+vente_show:
+    path: /ventes/{id}
+    controller: 'App\Controller\VenteController::show'
+    methods: [GET]
+
+vente_update:
+    path: /ventes/{id}
+    controller: 'App\Controller\VenteController::update'
+    methods: [PUT]
+
+vente_delete:
+    path: /ventes/{id}
+    controller: 'App\Controller\VenteController::delete'
+    methods: [DELETE]
+fournisseur_index:
+    path: /fournisseurs
+    controller: 'App\Controller\FournisseurController::index'
+    methods: [GET]
+
+fournisseur_create:
+    path: /fournisseurs
+    controller: 'App\Controller\FournisseurController::create'
+    methods: [POST]
+
+fournisseur_show:
+    path: /fournisseurs/{id}
+    controller: 'App\Controller\FournisseurController::show'
+    methods: [GET]
+
+fournisseur_update:
+    path: /fournisseurs/{id}
+    controller: 'App\Controller\FournisseurController::update'
+    methods: [PUT]
+
+fournisseur_delete:
+    path: /fournisseurs/{id}
+    controller: 'App\Controller\FournisseurController::delete'
+    methods: [DELETE]
+paiement_index:
+    path: /paiements
+    controller: 'App\Controller\PaiementController::index'
+    methods: [GET]
+
+paiement_create:
+    path: /paiements
+    controller: 'App\Controller\PaiementController::create'
+    methods: [POST]
+
+paiement_show:
+    path: /paiements/{id}
+    controller: 'App\Controller\PaiementController::show'
+    methods: [GET]
+
+paiement_update:
+    path: /paiements/{id}
+    controller: 'App\Controller\PaiementController::update'
+    methods: [PUT]
+
+paiement_delete:
+    path: /paiements/{id}
+    controller: 'App\Controller\PaiementController::delete'
+    methods: [DELETE]
+categorie_index:
+    path: /categories
+    controller: 'App\Controller\CategorieController::index'
+    methods: [GET]
+
+categorie_create:
+    path: /categories
+    controller: 'App\Controller\CategorieController::create'
+    methods: [POST]
+
+categorie_show:
+    path: /categories/{id}
+    controller: 'App\Controller\CategorieController::show'
+    methods: [GET]
+
+categorie_update:
+    path: /categories/{id}
+    controller: 'App\Controller\CategorieController::update'
+    methods: [PUT]
+
+categorie_delete:
+    path: /categories/{id}
+    controller: 'App\Controller\CategorieController::delete'
+    methods: [DELETE]

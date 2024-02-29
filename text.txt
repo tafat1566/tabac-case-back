@@ -1,0 +1,5 @@
+{
+    "montant": 25.75,
+    "date_paiement": "2024-02-25",
+    "produit_id": [3,3, 3]
+}
