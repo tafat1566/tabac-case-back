@@ -22,8 +22,9 @@ class Paiement
     private ?float $montant = null;
     
     
-    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $date_paiement = null;
+    
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $methode_paiement = null;

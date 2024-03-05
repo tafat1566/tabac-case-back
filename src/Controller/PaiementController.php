@@ -24,14 +24,35 @@ class PaiementController extends AbstractController
         $this->paiementRepository = $paiementRepository;
     }
 
-    /**
-     * @Route("/paiements", name="paiement_index", methods={"GET"})
-     */
-    public function index(): JsonResponse
-    {
-        $paiements = $this->paiementRepository->findAll();
-        return $this->json($paiements);
+/**
+ * @Route("/paiements", name="paiement_index", methods={"GET"})
+ */
+public function index(): JsonResponse
+{
+    $paiements = $this->paiementRepository->findAll();
+    
+    // Créer un tableau pour stocker les données des paiements
+    $data = [];
+
+    // Boucle à travers chaque paiement pour obtenir ses attributs
+    foreach ($paiements as $paiement) {
+        // Construire un tableau associatif avec les attributs du paiement
+        $paiementData = [
+            'id' => $paiement->getId(),
+            'montant' => $paiement->getMontant(),
+            'date_paiement'=> $paiement->getDatePaiement(),
+            'methode_paiement' => $paiement->getMethodePaiement(),
+            
+        ];
+
+        // Ajouter les données du paiement au tableau
+        $data[] = $paiementData;
     }
+
+    // Retourner les données des paiements en tant que réponse JSON
+    return $this->json($data);
+}
+
 
     /**
      * @Route("/paiements/{id}", name="paiement_show", methods={"GET"})
@@ -47,7 +68,7 @@ class PaiementController extends AbstractController
 public function create(Request $request): JsonResponse
 {
     $data = json_decode($request->getContent(), true);
-    // dd($data);
+    
     // Vérifiez si les données ont été correctement décodées
     if ($data === null || !isset($data['montant']) || !isset($data['produit_id'])) {
         return $this->json(['error' => 'Invalid or incomplete data provided'], Response::HTTP_BAD_REQUEST);
@@ -71,30 +92,44 @@ public function create(Request $request): JsonResponse
 
     // Gérez les relations avec les produits
     foreach ($data['produit_id'] as $produitId) {
+        // Recherchez le produit dans la base de données en utilisant son ID
         $produit = $this->entityManager->getRepository(Produit::class)->find($produitId);
         
         if ($produit === null) {
             return $this->json(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
+    
+        // Vérifiez si la quantité en stock est suffisante pour la vente
+        if ($produit->getQuantiteEnStock() < 1) {
+            return $this->json(['error' => 'Product out of stock'], Response::HTTP_BAD_REQUEST);
+        }
+    
+        // Mettez à jour la quantité en stock du produit
+        $quantiteVendue = 1; // par exemple, vous pouvez modifier la quantité vendue en fonction de vos besoins
+        $nouvelleQuantiteEnStock = $produit->getQuantiteEnStock() - $quantiteVendue;
+        $produit->setQuantiteEnStock($nouvelleQuantiteEnStock);
+
+        // Persistez l'entité Produit dans la base de données
+        $this->entityManager->persist($produit);
+    
         // Utilisez la méthode addProduit() pour ajouter le produit au paiement
         $paiement->addProduit($produit);
-
+    
         // Créez une nouvelle instance de PaiementProduit
         $paiementProduit = new PaiementProduit();
         $paiementProduit->setPaiement($paiement);
         $paiementProduit->setProduit($produit);
-
+    
         // Persistez l'entité PaiementProduit dans la base de données
         $this->entityManager->persist($paiementProduit);
     }
-
+    
     // Persistez l'entité Paiement dans la base de données
     $this->entityManager->persist($paiement);
     $this->entityManager->flush();
-
+    
     // Retournez la réponse JSON avec les données du paiement nouvellement créé
-    var_dump('azul',$produit);
-    return $this->json('azul');
+    return $this->json('Payment successfully processed');
 }
 
 
@@ -113,6 +148,35 @@ public function create(Request $request): JsonResponse
         $this->entityManager->flush();
 
         return $this->json($paiement);
+    }
+
+
+    /**
+ * @Route("/paiements/chiffre_affaire", name="paiement_chiffre_affaire", methods={"POST"})
+ */
+public function chiffreAffaireIntervalle(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier si les dates de début et de fin sont fournies dans la requête
+        if (!isset($data['date_debut']) || !isset($data['date_fin'])) {
+            return $this->json(['error' => 'Missing start or end date'], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Convertir les dates en objets DateTime
+        $dateDebut = new \DateTime($data['date_debut']);
+        $dateFin = new \DateTime($data['date_fin']);
+
+        // Récupérer les paiements compris dans l'intervalle de dates spécifié
+        $paiements = $this->paiementRepository->findByDateInterval($dateDebut, $dateFin);
+
+        // Calculer le chiffre d'affaires total pour les paiements trouvés
+        $chiffreAffaireTotal = 0;
+        foreach ($paiements as $paiement) {
+            $chiffreAffaireTotal += $paiement->getMontant();
+        }
+
+        return $this->json(['chiffre_affaire' => $chiffreAffaireTotal]);
     }
 
     /**
