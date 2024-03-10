@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
+
 class PaiementController extends AbstractController
 {
     private $entityManager;
@@ -88,7 +90,7 @@ public function create(Request $request): JsonResponse
     }
     $paiement->setDatePaiement($datePaiement);
 
-    $paiement->setMethodePaiement('espece');
+    $paiement->setMethodePaiement($data['moyen_paiement']);
 
     // Gérez les relations avec les produits
     foreach ($data['produit_id'] as $produitId) {
@@ -115,11 +117,16 @@ public function create(Request $request): JsonResponse
         // Utilisez la méthode addProduit() pour ajouter le produit au paiement
         $paiement->addProduit($produit);
     
+        if (isset($data['date_paiement'])) {
+            $datedate = new \DateTime($data['date_paiement']);
+        } else {
+            $datedate = new \DateTime(); // Date et heure actuelles
+        }
         // Créez une nouvelle instance de PaiementProduit
         $paiementProduit = new PaiementProduit();
         $paiementProduit->setPaiement($paiement);
         $paiementProduit->setProduit($produit);
-    
+        $paiementProduit->setDatedate($datedate);
         // Persistez l'entité PaiementProduit dans la base de données
         $this->entityManager->persist($paiementProduit);
     }
@@ -189,4 +196,103 @@ public function chiffreAffaireIntervalle(Request $request): JsonResponse
 
         return new Response('', Response::HTTP_NO_CONTENT);
     }
+
+/**
+     * @Route("/last", name="paiement_last", methods={"GET"})
+     */
+    public function getLastPayment(Request $request): JsonResponse
+    {
+        // Récupérer le dernier paiement de la table "paiement"
+    $lastPayment = $this->entityManager->getRepository(Paiement::class)
+    ->findOneBy([], ['datePaiement' => 'DESC']);
+
+if (!$lastPayment) {
+    return $this->json(['error' => 'No payments found'], Response::HTTP_NOT_FOUND);
+}
+
+// Récupérer tous les produits associés à ce paiement à partir de la table "paiement_produit"
+$paiementProduits = $this->entityManager->getRepository(PaiementProduit::class)
+    ->findBy(['paiement' => $lastPayment]);
+
+// Initialiser les détails des produits et le montant total
+$productDetails = [];
+$totalAmount = 0;
+
+// Obtenir les détails des produits à partir de la table "produit"
+foreach ($paiementProduits as $paiementProduit) {
+    $produit = $paiementProduit->getProduit();
+    $productDetails[] = [
+        'nom' => $produit->getNom(),
+        'prix_unitaire' => $produit->getPrixUnitaire(),
+    ];
+    $totalAmount += $produit->getPrixUnitaire();
+}
+
+// Retourner toutes les informations via une API
+$response = [
+    'paiement' => [
+        'id' => $lastPayment->getId(),
+        'montant' => $lastPayment->getMontant(),
+        'date_paiement' => $lastPayment->getDatePaiement()->format('Y-m-d H:i:s'),
+        'methode_paiement' => $lastPayment->getMethodePaiement(),
+    ],
+    'produits' => $productDetails,
+    'montant_total' => $totalAmount,
+];
+
+return $this->json($response);
+    }
+
+/**
+ * @Route("/api/print-ticket", name="print_ticket", methods={"GET", "POST"})
+ */
+    public function printTicket(Request $request): JsonResponse
+    {
+        // Récupérer le dernier paiement de la table "paiement"
+        $lastPayment = $this->entityManager->getRepository(Paiement::class)
+            ->findOneBy([], ['date_paiement' => 'DESC']);
+    
+        if (!$lastPayment) {
+            return $this->json(['error' => 'No payments found'], Response::HTTP_NOT_FOUND);
+        }
+    
+        // Récupérer tous les produits associés à ce paiement à partir de la table "paiement_produit"
+        $paiementProduits = $this->entityManager->getRepository(PaiementProduit::class)
+            ->findBy(['paiement' => $lastPayment]);
+    
+        // Initialiser les détails des produits et le montant total
+        $productDetails = [];
+        $totalAmount = 0;
+    
+        // Obtenir les détails des produits à partir de la table "produit"
+        foreach ($paiementProduits as $paiementProduit) {
+            $produit = $paiementProduit->getProduit();
+            // Récupérer les détails du produit à partir de la table "produit"
+            $productEntity = $this->entityManager->getRepository(Produit::class)->find($produit->getId());
+            if ($productEntity) {
+                $productDetails[] = [
+                    'nom' => $productEntity->getNom(),
+                    'prix_unitaire' => $productEntity->getPrixUnitaire(),
+                ];
+                $totalAmount += $productEntity->getPrixUnitaire();
+            }
+        }
+    
+        // Retourner toutes les informations via une API
+        $response = [
+            'paiement' => [
+                'id' => $lastPayment->getId(),
+                'montant' => $lastPayment->getMontant(),
+                'date_paiement' => $lastPayment->getDatePaiement()->format('Y-m-d H:i:s'),
+                'methode_paiement' => $lastPayment->getMethodePaiement(),
+            ],
+            'produits' => $productDetails,
+            'montant_total' => $totalAmount,
+        ];
+    
+        return $this->json($response);
+    }
+    
+
+ 
 }

@@ -58,7 +58,8 @@ class CategorieController extends AbstractController
         $categorie = new Categorie();
         $categorie->setNom($data['nom']);
         $categorie->setDescription($data['description'] ?? null);
-    
+        $categorie->getImage($data['image']);
+        
         // Persistez l'entité dans la base de données
         $this->entityManager->persist($categorie);
         $this->entityManager->flush();
@@ -84,34 +85,48 @@ class CategorieController extends AbstractController
             'id' => $categorie->getId(),
             'nom' => $categorie->getNom(),
             'description' => $categorie->getDescription(),
+            'image' => $categorie->getImage(),
         ];
 
         return $this->json($data);
     }
 
     #[Route('/categories/{id}', name: 'categorie_update', methods: ['PUT'])]
-    public function update(Request $request, int $id): JsonResponse
+    public function update(Request $request, int $id, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        
+    
         // Récupération de la catégorie à mettre à jour
-        $categorie = $this->categorieRepository->find($id);
+        $categorie = $entityManager->getRepository(Categorie::class)->find($id);
     
         if (!$categorie) {
-            return $this->json(['message' => 'Catégorie non trouvée'], Response::HTTP_NOT_FOUND);
+            return new JsonResponse(['message' => 'Catégorie non trouvée'], Response::HTTP_NOT_FOUND);
         }
     
         // Mise à jour des champs de la catégorie
-        $categorie->setNom($data['nom']);
-        $categorie->setDescription($data['description']);
-        
+        if (isset($data['nom'])) {
+            $categorie->setNom($data['nom']);
+        }
+        if (isset($data['description'])) {
+            $categorie->setDescription($data['description']);
+        }
+    
         // Enregistrement des changements dans la base de données
-        $this->entityManager->flush();
-        
-        // Retourner la catégorie mise à jour
-        return $this->json($categorie);
+        try {
+            $entityManager->flush();
+            // Retourner les données de la catégorie mise à jour
+            $updatedData = [
+                'id' => $categorie->getId(),
+                'nom' => $categorie->getNom(),
+                'description' => $categorie->getDescription(),
+            ];
+            return new JsonResponse($updatedData, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return new JsonResponse(['message' => 'Une erreur est survenue lors de la mise à jour de la catégorie'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
     
+
     
     #[Route('/categories/{id}', name: 'categorie_delete', methods: ['DELETE'])]
     public function delete(int $id): Response

@@ -100,7 +100,15 @@ paiement_chiffre_affaire:
     path: /paiements/chiffre_affaire
     controller: 'App\Controller\PaiementController::chiffreAffaireIntervalle'
     methods: [POST]
-
+    
+paiement_print_last:
+    path: /paiements/last
+    controller: 'App\Controller\PaiementController::getLastPayment'
+    methods: [GET]
+print_ticket:
+    path: /api/print-ticket
+    controller: App\Controller\PaiementController::printTicket
+    methods: [GET]
 categorie_index:
     path: /categories
     controller: 'App\Controller\CategorieController::index'
@@ -125,3 +133,25 @@ categorie_delete:
     path: /categories/{id}
     controller: 'App\Controller\CategorieController::delete'
     methods: [DELETE]
+
+# config/routes.yaml
+
+get_notifications:
+    path: /notifications
+    controller: App\Controller\NotificationController::getNotifications
+    methods: ['GET']
+
+create_notification:
+    path: /notifications
+    controller: App\Controller\NotificationController::createNotification
+    methods: ['POST']
+
+mark_notification_as_read:
+    path: /notifications/{id}/mark-as-read
+    controller: App\Controller\NotificationController::markNotificationAsRead
+    methods: ['PUT']
+
+get_latest_notifications:
+    path: /notifications/latest
+    controller: App\Controller\NotificationController::getLatestNotifications
+    methods: ['GET']
