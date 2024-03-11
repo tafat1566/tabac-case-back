@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Entity\Notification;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Produit;
 
 class NotificationController extends AbstractController
 {
@@ -36,6 +37,26 @@ public function createNotification(Request $request, EntityManagerInterface $ent
     $notification->setDateCreation(new \DateTime());
     $notification->setLu(false); // Définit par défaut à false
 
+    // Récupère la liste des produits
+    $products = $entityManager->getRepository(Produit::class)->findAll();
+
+    // Parcours la liste des produits
+    foreach ($products as $product) {
+        // Vérifie si la quantité en stock est inférieure à 10
+        if ($product->getQuantiteEnStock() < 10) {
+            // Crée une nouvelle notification
+            $newNotification = new Notification();
+            $newNotification->setMessage('La quantité en stock du produit ' . $product->getNom() . ' est inférieure à 10.');
+            $newNotification->setType('warning'); // Peut-être que 'warning' convient pour ce type de notification
+            $newNotification->setDateCreation(new \DateTime());
+            $newNotification->setLu(false); // Définit par défaut à false
+
+            // Persiste la nouvelle notification dans la base de données
+            $entityManager->persist($newNotification);
+        }
+    }
+
+    // Persiste la notification initiale
     $entityManager->persist($notification);
     $entityManager->flush();
 
