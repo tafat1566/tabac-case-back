@@ -3,7 +3,7 @@
 
 ## Description
 
-Ce référentiel contient le code source de l'application TabacEase-Back, une API développée en Symfony pour gérer les paiements, les encaissements, les produits, les fournisseurs, et pour calculer le chiffre d'affaires de l'entreprise.
+Ce référentiel contient le code source de l'application TabacEase-Back, une API développée en Symfony pour gérer les paiements, les encaissements, les produits, les fournisseurs, et calculer le chiffre d'affaires d'un bureau de tabac.
 
 ## Installation
 
