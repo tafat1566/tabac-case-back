@@ -110,7 +110,7 @@ class Fournisseur
     public function removeProduit(Produit $produit): static
     {
         if ($this->produit->removeElement($produit)) {
-            // set the owning side to null (unless already changed)
+            
             if ($produit->getFournisseur() === $this) {
                 $produit->setFournisseur(null);
             }

@@ -33,12 +33,12 @@ public function index(): JsonResponse
 {
     $paiements = $this->paiementRepository->findAll();
     
-    // Créer un tableau pour stocker les données des paiements
+    
     $data = [];
 
-    // Boucle à travers chaque paiement pour obtenir ses attributs
+    
     foreach ($paiements as $paiement) {
-        // Construire un tableau associatif avec les attributs du paiement
+        
         $paiementData = [
             'id' => $paiement->getId(),
             'montant' => $paiement->getMontant(),
@@ -47,11 +47,11 @@ public function index(): JsonResponse
             
         ];
 
-        // Ajouter les données du paiement au tableau
+        
         $data[] = $paiementData;
     }
 
-    // Retourner les données des paiements en tant que réponse JSON
+    
     return $this->json($data);
 }
 
@@ -71,71 +71,71 @@ public function create(Request $request): JsonResponse
 {
     $data = json_decode($request->getContent(), true);
     
-    // Vérifiez si les données ont été correctement décodées
+    
     if ($data === null || !isset($data['montant']) || !isset($data['produit_id'])) {
         return $this->json(['error' => 'Invalid or incomplete data provided'], Response::HTTP_BAD_REQUEST);
     }
 
-    // Créez une nouvelle instance de Paiement
+    
     $paiement = new Paiement();
 
-    // Définissez les différentes propriétés du paiement en fonction des données reçues
+    
     $paiement->setMontant($data['montant']);
 
-    // Vérifiez si une date de paiement est fournie, sinon utilisez la date actuelle
+    
     if (isset($data['date_paiement'])) {
         $datePaiement = new \DateTime($data['date_paiement']);
     } else {
-        $datePaiement = new \DateTime(); // Date et heure actuelles
+        $datePaiement = new \DateTime(); 
     }
     $paiement->setDatePaiement($datePaiement);
 
     $paiement->setMethodePaiement($data['moyen_paiement']);
 
-    // Gérez les relations avec les produits
+    
     foreach ($data['produit_id'] as $produitId) {
-        // Recherchez le produit dans la base de données en utilisant son ID
+        
         $produit = $this->entityManager->getRepository(Produit::class)->find($produitId);
         
         if ($produit === null) {
             return $this->json(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
         }
     
-        // Vérifiez si la quantité en stock est suffisante pour la vente
+        
         if ($produit->getQuantiteEnStock() < 1) {
             return $this->json(['error' => 'Product out of stock'], Response::HTTP_BAD_REQUEST);
         }
     
-        // Mettez à jour la quantité en stock du produit
-        $quantiteVendue = 1; // par exemple, vous pouvez modifier la quantité vendue en fonction de vos besoins
+        
+        $quantiteVendue = 1; 
         $nouvelleQuantiteEnStock = $produit->getQuantiteEnStock() - $quantiteVendue;
         $produit->setQuantiteEnStock($nouvelleQuantiteEnStock);
 
-        // Persistez l'entité Produit dans la base de données
+        
         $this->entityManager->persist($produit);
     
-        // Utilisez la méthode addProduit() pour ajouter le produit au paiement
+        
         $paiement->addProduit($produit);
     
         if (isset($data['date_paiement'])) {
             $datedate = new \DateTime($data['date_paiement']);
         } else {
-            $datedate = new \DateTime(); // Date et heure actuelles
+            $datedate = new \DateTime(); 
         }
-        // Créez une nouvelle instance de PaiementProduit
+        
         $paiementProduit = new PaiementProduit();
         $paiementProduit->setPaiement($paiement);
         $paiementProduit->setProduit($produit);
         $paiementProduit->setDatedate($datedate);
-        // Persistez l'entité PaiementProduit dans la base de données
+        
         $this->entityManager->persist($paiementProduit);
     }
     
-    // Persistez l'entité Paiement dans la base de données
+    
     $this->entityManager->persist($paiement);
     $this->entityManager->flush();
     
-    // Retournez la réponse JSON avec les données du paiement nouvellement créé
+    
     return $this->json('Payment successfully processed');
 }
 
@@ -150,7 +150,7 @@ public function create(Request $request): JsonResponse
         $data = json_decode($request->getContent(), true);
 
         $paiement->setMontant($data['montant']);
-        // Assurez-vous de mettre à jour d'autres champs de la même manière
+        
 
         $this->entityManager->flush();
 
@@ -165,19 +165,19 @@ public function chiffreAffaireIntervalle(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        // Vérifier si les dates de début et de fin sont fournies dans la requête
+        
         if (!isset($data['date_debut']) || !isset($data['date_fin'])) {
             return $this->json(['error' => 'Missing start or end date'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Convertir les dates en objets DateTime
+        
         $dateDebut = new \DateTime($data['date_debut']);
         $dateFin = new \DateTime($data['date_fin']);
 
-        // Récupérer les paiements compris dans l'intervalle de dates spécifié
+        
         $paiements = $this->paiementRepository->findByDateInterval($dateDebut, $dateFin);
 
-        // Calculer le chiffre d'affaires total pour les paiements trouvés
+        
         $chiffreAffaireTotal = 0;
         foreach ($paiements as $paiement) {
             $chiffreAffaireTotal += $paiement->getMontant();
@@ -202,7 +202,7 @@ public function chiffreAffaireIntervalle(Request $request): JsonResponse
      */
     public function getLastPayment(Request $request): JsonResponse
     {
-        // Récupérer le dernier paiement de la table "paiement"
+        
     $lastPayment = $this->entityManager->getRepository(Paiement::class)
     ->findOneBy([], ['datePaiement' => 'DESC']);
 
@@ -210,15 +210,15 @@ if (!$lastPayment) {
     return $this->json(['error' => 'No payments found'], Response::HTTP_NOT_FOUND);
 }
 
-// Récupérer tous les produits associés à ce paiement à partir de la table "paiement_produit"
+
 $paiementProduits = $this->entityManager->getRepository(PaiementProduit::class)
     ->findBy(['paiement' => $lastPayment]);
 
-// Initialiser les détails des produits et le montant total
+
 $productDetails = [];
 $totalAmount = 0;
 
-// Obtenir les détails des produits à partir de la table "produit"
+
 foreach ($paiementProduits as $paiementProduit) {
     $produit = $paiementProduit->getProduit();
     $productDetails[] = [
@@ -228,7 +228,7 @@ foreach ($paiementProduits as $paiementProduit) {
     $totalAmount += $produit->getPrixUnitaire();
 }
 
-// Retourner toutes les informations via une API
+
 $response = [
     'paiement' => [
         'id' => $lastPayment->getId(),
@@ -248,7 +248,7 @@ return $this->json($response);
  */
     public function printTicket(Request $request): JsonResponse
     {
-        // Récupérer le dernier paiement de la table "paiement"
+        
         $lastPayment = $this->entityManager->getRepository(Paiement::class)
             ->findOneBy([], ['date_paiement' => 'DESC']);
     
@@ -256,18 +256,18 @@ return $this->json($response);
             return $this->json(['error' => 'No payments found'], Response::HTTP_NOT_FOUND);
         }
     
-        // Récupérer tous les produits associés à ce paiement à partir de la table "paiement_produit"
+        
         $paiementProduits = $this->entityManager->getRepository(PaiementProduit::class)
             ->findBy(['paiement' => $lastPayment]);
     
-        // Initialiser les détails des produits et le montant total
+        
         $productDetails = [];
         $totalAmount = 0;
     
-        // Obtenir les détails des produits à partir de la table "produit"
+        
         foreach ($paiementProduits as $paiementProduit) {
             $produit = $paiementProduit->getProduit();
-            // Récupérer les détails du produit à partir de la table "produit"
+            
             $productEntity = $this->entityManager->getRepository(Produit::class)->find($produit->getId());
             if ($productEntity) {
                 $productDetails[] = [
@@ -278,7 +278,7 @@ return $this->json($response);
             }
         }
     
-        // Retourner toutes les informations via une API
+        
         $response = [
             'paiement' => [
                 'id' => $lastPayment->getId(),

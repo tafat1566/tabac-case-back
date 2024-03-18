@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  symfony:
+    build:
+      context: ./TabacEase-Back
+    ports:
+      - "8000:8000"  # Port sur lequel Symfony est exposé
+    volumes:
+      - ./TabacEase-Back:/var/www/html  # Montez le répertoire Symfony dans le conteneur
+    depends_on:
+      - postgres  # Dépend de PostgreSQL
+  reactjs:
+    build:
+      context: ./TabacEase-Front
+    ports:
+      - "3000:3000"  # Port sur lequel ReactJS est exposé
+    volumes:
+      - ./TabacEase-Front:/usr/src/app  # Montez le répertoire ReactJS dans le conteneur
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tabacData

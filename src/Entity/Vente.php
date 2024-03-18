@@ -14,9 +14,9 @@ class Vente
     #[ORM\Column]
     private ?int $id = null;
 
-    // Supprimez la référence à l'entité Produit
-    // #[ORM\ManyToOne(inversedBy: 'ventes')]
-    // private ?Produit $produit = null;
+    
+    
+    
 
     #[ORM\Column(nullable: true)]
     private ?int $quantiteVendue = null;
@@ -29,18 +29,18 @@ class Vente
         return $this->id;
     }
 
-    // Supprimez les méthodes associées à l'entité Produit
-    // public function getProduit(): ?Produit
-    // {
-    //     return $this->produit;
-    // }
+    
+    
+    
+    
+    
 
-    // public function setProduit(?Produit $produit): static
-    // {
-    //     $this->produit = $produit;
-    //
-    //     return $this;
-    // }
+    
+    
+    
+    
+    
+    
 
     public function getQuantiteVendue(): ?int
     {

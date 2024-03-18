@@ -136,7 +136,7 @@ class Produit
     public function removePaiement(Paiement $paiement): static
     {
         if ($this->paiements->removeElement($paiement)) {
-            // set the owning side to null (unless already changed)
+            
             if ($paiement->getProduit() === $this) {
                 $paiement->setProduit(null);
             }
@@ -166,7 +166,7 @@ class Produit
     public function removePaiementProduit(PaiementProduit $paiementProduit): static
     {
         if ($this->paiementProduits->removeElement($paiementProduit)) {
-            // set the owning side to null (unless already changed)
+            
             if ($paiementProduit->getProduit() === $this) {
                 $paiementProduit->setProduit(null);
             }
@@ -208,7 +208,7 @@ class Produit
     public function removeStock(Stock $stock): static
     {
         if ($this->stocks->removeElement($stock)) {
-            // set the owning side to null (unless already changed)
+            
             if ($stock->getProduitt() === $this) {
                 $stock->setProduitt(null);
             }

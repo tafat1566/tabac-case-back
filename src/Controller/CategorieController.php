@@ -36,7 +36,7 @@ class CategorieController extends AbstractController
                 'id' => $categorie->getId(),
                 'nom' => $categorie->getNom(),
                 'description' => $categorie->getDescription(),
-                // Vous pouvez ajouter d'autres propriétés de la catégorie si nécessaire
+                
             ];
         }
     
@@ -49,24 +49,24 @@ class CategorieController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         
-        // Vérifier si les données ont été correctement décodées
+        
         if ($data === null || !isset($data['nom'])) {
             return $this->json(['error' => 'Invalid or incomplete data provided'], Response::HTTP_BAD_REQUEST);
         }
         
-        // Continuer le traitement si les données sont correctes
+        
         $categorie = new Categorie();
         $categorie->setNom($data['nom']);
         $categorie->setDescription($data['description'] ?? null);
         $categorie->getImage($data['image']);
         
-        // Persistez l'entité dans la base de données
+        
         $this->entityManager->persist($categorie);
         $this->entityManager->flush();
     
-        // Exclure les relations problématiques lors de la sérialisation
+        
         $jsonContent = $serializer->serialize($categorie, 'json', [
-            'ignored_attributes' => ['relationA', 'relationB'], // Remplacez 'relationA' et 'relationB' par les noms de vos relations problématiques
+            'ignored_attributes' => ['relationA', 'relationB'], 
         ]);
     
         return new JsonResponse($jsonContent, Response::HTTP_OK, [], true);
@@ -96,14 +96,14 @@ class CategorieController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
     
-        // Récupération de la catégorie à mettre à jour
+        
         $categorie = $entityManager->getRepository(Categorie::class)->find($id);
     
         if (!$categorie) {
             return new JsonResponse(['message' => 'Catégorie non trouvée'], Response::HTTP_NOT_FOUND);
         }
     
-        // Mise à jour des champs de la catégorie
+        
         if (isset($data['nom'])) {
             $categorie->setNom($data['nom']);
         }
@@ -111,10 +111,10 @@ class CategorieController extends AbstractController
             $categorie->setDescription($data['description']);
         }
     
-        // Enregistrement des changements dans la base de données
+        
         try {
             $entityManager->flush();
-            // Retourner les données de la catégorie mise à jour
+            
             $updatedData = [
                 'id' => $categorie->getId(),
                 'nom' => $categorie->getNom(),

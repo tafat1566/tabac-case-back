@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-// use Doctrine\Common\Collections\ArrayCollection;
+
 
 
 #[ORM\Entity(repositoryClass: PaiementRepository::class)]
@@ -40,10 +40,10 @@ class Paiement
     public function __construct()
     {
         $this->paiementProduits = new ArrayCollection();
-        $this->produits = new ArrayCollection(); // Initialisation de la propriété $produits
+        $this->produits = new ArrayCollection(); 
     }
     
-    // Méthodes getters et setters pour $id, $montant, $date_paiement, $methode_paiement et $produit
+    
 
     public function getId(): ?int
     {
@@ -135,7 +135,7 @@ public function removeProduit(Produit $produit): self
     public function removePaiementProduit(PaiementProduit $paiementProduit): static
     {
         if ($this->paiementProduits->removeElement($paiementProduit)) {
-            // set the owning side to null (unless already changed)
+            
             if ($paiementProduit->getPaiement() === $this) {
                 $paiementProduit->setPaiement(null);
             }

@@ -21,7 +21,7 @@ class ProduitController extends AbstractController
     private $entityManager;
     private $produitRepository;
     private $fournisseurRepository;
-    // private $produitRepository;
+    
     private $serializer;
 
     public function __construct(
@@ -55,12 +55,12 @@ class ProduitController extends AbstractController
                 'description' => $produit->getDescription(),
                 'quantite_en_stock' => $produit->getQuantiteEnStock(),
                 'prix_unitaire' => $produit->getPrixUnitaire(),
-                'categorie_id' => $categorieId, // Utilisez l'identifiant de la catégorie ou null s'il n'y a pas de catégorie associée
+                'categorie_id' => $categorieId, 
             ];
         }
-        // Exclure les relations problématiques lors de la sérialisation
+        
         $jsonContent = $this->serializer->serialize($data, 'json', [
-            'ignored_attributes' => ['relationA', 'relationB'], // Remplacez 'relationA' et 'relationB' par les noms de vos relations problématiques
+            'ignored_attributes' => ['relationA', 'relationB'], 
         ]);
 
         return new JsonResponse($jsonContent, JsonResponse::HTTP_OK, [], true);
@@ -74,56 +74,56 @@ class ProduitController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         
-        // Vérifier si les données ont été correctement décodées
+        
         if ($data === null || !isset($data['nom']) || !isset($data['prix_unitaire'])) {
             return $this->json(['error' => 'Invalid or incomplete data provided'], Response::HTTP_BAD_REQUEST);
         }
         
-        // Continuer le traitement si les données sont correctes
+        
         $produit = new Produit();
         $produit->setNom($data['nom']);
         $produit->setPrixUnitaire($data['prix_unitaire']);
         $produit->setQuantiteEnStock($data['quantite_en_stock'] ?? null);
     
-        // Gérez les relations avec d'autres entités, si nécessaire (par exemple, fournisseur)
-// Gérez les relations avec d'autres entités, si nécessaire (par exemple, fournisseur)
+        
+
     if (isset($data['fournisseur_id'])) {
-    // Récupérez d'abord l'entité Fournisseur correspondant à l'ID fourni
+    
     $fournisseur = $this->entityManager->getRepository(Fournisseur::class)->find($data['fournisseur_id']);
     if ($fournisseur === null) {
         return $this->json(['error' => 'Supplier not found'], Response::HTTP_NOT_FOUND);
     }
 
-    // Assurez-vous que $fournisseur est bien une instance de Fournisseur
+    
     if (!$fournisseur instanceof Fournisseur) {
         return $this->json(['error' => 'Invalid supplier provided'], Response::HTTP_BAD_REQUEST);
     }
 
-    // Assignez l'entité Fournisseur au Produit
+    
     $produit->setFournisseur($fournisseur);
 }
 if (isset($data['categorie_id'])) {
-    // Récupérez l'entité Categorie correspondant à l'ID fourni
+    
     $categorie = $this->entityManager->getRepository(Categorie::class)->find($data['categorie_id']);
     if ($categorie === null) {
         return $this->json(['error' => 'Category not found'], Response::HTTP_NOT_FOUND);
     }
 
-    // Assurez-vous que $categorie est bien une instance de Categorie
+    
     if (!$categorie instanceof Categorie) {
         return $this->json(['error' => 'Invalid category provided'], Response::HTTP_BAD_REQUEST);
     }
 
-    // Assignez l'entité Categorie au Produit
+    
     $produit->setCategorie($categorie);
 }
-        // Persistez l'entité dans la base de données
+        
         $this->entityManager->persist($produit);
         $this->entityManager->flush();
     
-        // Exclure les relations problématiques lors de la sérialisation
+        
         $jsonContent = $serializer->serialize($produit, 'json', [
-            'ignored_attributes' => ['relationA', 'relationB'], // Remplacez 'relationA' et 'relationB' par les noms de vos relations problématiques
+            'ignored_attributes' => ['relationA', 'relationB'], 
         ]);
     
         return new JsonResponse($jsonContent, Response::HTTP_OK, [], true);
@@ -141,8 +141,8 @@ if (isset($data['categorie_id'])) {
         $data = [
             'id' => $produit->getId(),
             'nom' => $produit->getNom(),
-            'prix_unitaire' => $produit->getPrixUnitaire(), // Assurez-vous d'avoir une méthode getPrixUnitaire() dans votre entité Produit
-            // Vous pouvez ajouter d'autres propriétés du produit si nécessaire
+            'prix_unitaire' => $produit->getPrixUnitaire(), 
+            
             'categorie_id' => $produit->getCategorie()->getId(),
 
             
@@ -156,41 +156,41 @@ if (isset($data['categorie_id'])) {
     {
         $data = json_decode($request->getContent(), true);
         
-        // Récupération du produit à mettre à jour
+        
         $produit = $this->produitRepository->find($id);
     
         if (!$produit) {
             return $this->json(['message' => 'Produit non trouvé'], Response::HTTP_NOT_FOUND);
         }
     
-        // Mise à jour des champs du produit
+        
         $produit->setNom($data['nom']);
         $produit->setDescription($data['description']);
         $produit->setPrixUnitaire($data['prix_unitaire']);
         $produit->setQuantiteEnStock($data['quantite_en_stock']);
         
-        // Vous devez utiliser la méthode setFournisseur() si la relation est ManyToOne
+        
         $fournisseur = $this->fournisseurRepository->find($data['fournisseur_id']);
         $produit->setFournisseur($fournisseur);
         if (isset($data['categorie_id'])) {
-            // Récupérez l'entité Categorie correspondant à l'ID fourni
+            
             $categorie = $this->entityManager->getRepository(Categorie::class)->find($data['categorie_id']);
             if ($categorie === null) {
                 return $this->json(['error' => 'Category not found'], Response::HTTP_NOT_FOUND);
             }
 
-            // Assurez-vous que $categorie est bien une instance de Categorie
+            
             if (!$categorie instanceof Categorie) {
                 return $this->json(['error' => 'Invalid category provided'], Response::HTTP_BAD_REQUEST);
             }
 
-            // Assignez la nouvelle catégorie au Produit
+            
             $produit->setCategorie($categorie);
         }
-        // Enregistrement des changements dans la base de données
+        
         $this->entityManager->flush();
         
-        // Retourner le produit mis à jour
+        
         return $this->json($produit);
     }
     

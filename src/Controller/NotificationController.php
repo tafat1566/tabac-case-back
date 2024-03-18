@@ -1,6 +1,6 @@
 <?php
 
-// src/Controller/NotificationController.php
+
 
 namespace App\Controller;
 
@@ -35,28 +35,28 @@ public function createNotification(Request $request, EntityManagerInterface $ent
     $notification->setMessage($data['message']);
     $notification->setType($data['type']);
     $notification->setDateCreation(new \DateTime());
-    $notification->setLu(false); // Définit par défaut à false
+    $notification->setLu(false); 
 
-    // Récupère la liste des produits
+    
     $products = $entityManager->getRepository(Produit::class)->findAll();
 
-    // Parcours la liste des produits
+    
     foreach ($products as $product) {
-        // Vérifie si la quantité en stock est inférieure à 10
+        
         if ($product->getQuantiteEnStock() < 10) {
-            // Crée une nouvelle notification
+            
             $newNotification = new Notification();
             $newNotification->setMessage('La quantité en stock du produit ' . $product->getNom() . ' est inférieure à 10.');
-            $newNotification->setType('warning'); // Peut-être que 'warning' convient pour ce type de notification
+            $newNotification->setType('warning'); 
             $newNotification->setDateCreation(new \DateTime());
-            $newNotification->setLu(false); // Définit par défaut à false
+            $newNotification->setLu(false); 
 
-            // Persiste la nouvelle notification dans la base de données
+            
             $entityManager->persist($newNotification);
         }
     }
 
-    // Persiste la notification initiale
+    
     $entityManager->persist($notification);
     $entityManager->flush();
 
@@ -87,11 +87,11 @@ public function createNotification(Request $request, EntityManagerInterface $ent
     public function getLatestNotifications(EntityManagerInterface $entityManager): JsonResponse
     {
         $notifications = $entityManager->getRepository(Notification::class)
-            ->findBy([], ['dateCreation' => 'DESC'], 20); // Récupère les 20 dernières notifications, triées par date de création décroissante
+            ->findBy([], ['dateCreation' => 'DESC'], 20); 
 
-        // Vous pouvez ajouter d'autres logiques de traitement si nécessaire avant de renvoyer les notifications
+        
 
         return $this->json($notifications);
     }
-    // Ajoutez d'autres actions API pour mettre à jour et supprimer les notifications si nécessaire
+    
 }
