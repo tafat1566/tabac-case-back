@@ -3,14 +3,14 @@
 
 ## Description
 
-Ce référentiel contient le code source de l'application TabacEase-Back, une API développée en Symfony pour interagir avec l'application TabacEase-Back.
+Ce référentiel contient le code source de l'application TabacEase-Back, une API développée en Symfony pour gérer les paiements, les encaissements, les produits, les fournisseurs, et pour calculer le chiffre d'affaires de l'entreprise.
 
 ## Installation
 
 ### PostgreSQL
 
 1. Assurez-vous d'avoir les droits d'administration sur votre système.
-2. Utilisez le gestionnaire de paquets de votre système pour installer PostgreSQL. Par exemple, sur Ubuntu, vous pouvez exécuter:
+2. Utilisez le gestionnaire de paquets de votre système pour installer PostgreSQL. Par exemple, sur Ubuntu, vous pouvez exécuter :
 
 ```bash
 sudo apt update
