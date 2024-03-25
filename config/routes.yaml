@@ -85,6 +85,10 @@ paiement_show:
     path: /paiements/{id}
     controller: 'App\Controller\PaiementController::show'
     methods: [GET]
+modifier_paiement:
+    path: /paiements/mode/{id}
+    controller: App\Controller\PaiementController::modifierPaiement
+    methods: [PUT]
 
 paiement_update:
     path: /paiements/{id}

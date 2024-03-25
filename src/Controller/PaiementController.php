@@ -142,20 +142,41 @@ public function create(Request $request): JsonResponse
 
 
 
-    /**
-     * @Route("/paiements/{id}", name="paiement_update", methods={"PUT"})
-     */
-    public function update(Request $request, Paiement $paiement): JsonResponse
-    {
-        $data = json_decode($request->getContent(), true);
+/**
+ * @Route("/paiements/{id}", name="paiement_update", methods={"PUT"})
+ */
+public function update(Request $request, Paiement $paiement): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
 
-        $paiement->setMontant($data['montant']);
-        
-
-        $this->entityManager->flush();
-
-        return $this->json($paiement);
+   
+    if (!isset($data['montant']) || !isset($data['produits'])) {
+        return $this->json(['error' => 'Invalid or incomplete data provided'], Response::HTTP_BAD_REQUEST);
     }
+
+    
+    $paiement->setMontant($data['montant']);
+
+    
+    foreach ($paiement->getProduits() as $produit) {
+        $paiement->removeProduit($produit);
+    }
+
+    
+    foreach ($data['produits'] as $produitId) {
+        $produit = $this->entityManager->getRepository(Produit::class)->find($produitId);
+        if (!$produit) {
+            return $this->json(['error' => 'Product not found'], Response::HTTP_NOT_FOUND);
+        }
+        $paiement->addProduit($produit);
+    }
+
+    
+    $this->entityManager->flush();
+
+    
+    return $this->json($paiement);
+}
 
 
     /**
@@ -186,6 +207,29 @@ public function chiffreAffaireIntervalle(Request $request): JsonResponse
         return $this->json(['chiffre_affaire' => $chiffreAffaireTotal]);
     }
 
+    /**
+     * @Route("/paiement/mode/{id}", name="modifier_paiement", methods={"PUT"})
+     */
+    public function modifierPaiement(Request $request, Paiement $paiement): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifie si les données sont valides
+        if (isset($data['montant'], $data['date_paiement'], $data['methode_paiement'])) {
+            // Mettre à jour les valeurs du paiement
+            $paiement->setMontant($data['montant']);
+            $paiement->setDatePaiement(new \DateTime($data['date_paiement']));
+            $paiement->setMethodePaiement($data['methode_paiement']);
+
+            // Enregistrer les modifications
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->flush();
+
+            return new JsonResponse(['message' => 'Paiement modifié avec succès'], JsonResponse::HTTP_OK);
+        }
+
+        return new JsonResponse(['message' => 'Données invalides'], JsonResponse::HTTP_BAD_REQUEST);
+    }
     /**
      * @Route("/paiements/{id}", name="paiement_delete", methods={"DELETE"})
      */
