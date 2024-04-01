@@ -43,11 +43,15 @@ class Produit
     #[ORM\OneToMany(targetEntity: Stock::class, mappedBy: 'produitt')]
     private Collection $stocks;
 
+    #[ORM\OneToMany(targetEntity: Livraison::class, mappedBy: 'produit')]
+    private Collection $livraisons;
+
     public function __construct()
     {
         $this->paiements = new ArrayCollection();
         $this->paiementProduits = new ArrayCollection();
         $this->stocks = new ArrayCollection();
+        $this->livraisons = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -211,6 +215,36 @@ class Produit
             
             if ($stock->getProduitt() === $this) {
                 $stock->setProduitt(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Livraison>
+     */
+    public function getLivraisons(): Collection
+    {
+        return $this->livraisons;
+    }
+
+    public function addLivraison(Livraison $livraison): static
+    {
+        if (!$this->livraisons->contains($livraison)) {
+            $this->livraisons->add($livraison);
+            $livraison->setProduit($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLivraison(Livraison $livraison): static
+    {
+        if ($this->livraisons->removeElement($livraison)) {
+            // set the owning side to null (unless already changed)
+            if ($livraison->getProduit() === $this) {
+                $livraison->setProduit(null);
             }
         }
 

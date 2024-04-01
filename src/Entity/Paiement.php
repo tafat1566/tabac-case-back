@@ -32,7 +32,7 @@ class Paiement
     #[ORM\ManyToOne(inversedBy: 'paiements')]
     private ?Produit $produit = null;
 
-    #[ORM\OneToMany(targetEntity: PaiementProduit::class, mappedBy: 'paiement')]
+    #[ORM\OneToMany(targetEntity: PaiementProduit::class, mappedBy: 'paiement', cascade: ["persist", "remove"])]
     private Collection $paiementProduits;
     
 
@@ -79,20 +79,20 @@ class Paiement
         return $this->methode_paiement;
     }
     public function addProduit(Produit $produit): self
-{
-    if (!$this->produits->contains($produit)) {
-        $this->produits[] = $produit;
+    {
+        if (!$this->produits->contains($produit)) {
+            $this->produits[] = $produit;
+        }
+
+        return $this;
     }
 
-    return $this;
-}
+    public function removeProduit(Produit $produit): self
+    {
+        $this->produits->removeElement($produit);
 
-public function removeProduit(Produit $produit): self
-{
-    $this->produits->removeElement($produit);
-
-    return $this;
-}
+        return $this;
+    }
 
 
     public function setMethodePaiement(?string $methode_paiement): static
@@ -132,15 +132,12 @@ public function removeProduit(Produit $produit): self
         return $this;
     }
 
-    public function removePaiementProduit(PaiementProduit $paiementProduit): static
+    public function delete(Paiement $paiement): Response
     {
-        if ($this->paiementProduits->removeElement($paiementProduit)) {
-            
-            if ($paiementProduit->getPaiement() === $this) {
-                $paiementProduit->setPaiement(null);
-            }
-        }
-
-        return $this;
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($paiement);
+        $entityManager->flush();
+    
+        return new Response('Le paiement a été supprimé ', Response::HTTP_NO_CONTENT);
     }
 }

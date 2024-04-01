@@ -58,7 +58,7 @@ class CategorieController extends AbstractController
         $categorie = new Categorie();
         $categorie->setNom($data['nom']);
         $categorie->setDescription($data['description'] ?? null);
-        $categorie->getImage($data['image']);
+        // $categorie->getImage($data['image']);
         
         
         $this->entityManager->persist($categorie);

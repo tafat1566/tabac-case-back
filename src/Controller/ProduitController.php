@@ -41,28 +41,35 @@ class ProduitController extends AbstractController
     {
         $produits = $this->produitRepository->findAll();
         $data = [];
-
+    
         foreach ($produits as $produit) {
             $categorieId = null;
             $categorie = $produit->getCategorie();
             if ($categorie !== null) {
                 $categorieId = $categorie->getId();
             }
-        
+    
+            $fournisseurId = null; // Nouvelle ligne pour l'ID du fournisseur
+            $fournisseur = $produit->getFournisseur();
+            if ($fournisseur !== null) {
+                $fournisseurId = $fournisseur->getId();
+            }
+    
             $data[] = [
                 'id' => $produit->getId(),
                 'nom' => $produit->getNom(),
                 'description' => $produit->getDescription(),
                 'quantite_en_stock' => $produit->getQuantiteEnStock(),
                 'prix_unitaire' => $produit->getPrixUnitaire(),
-                'categorie_id' => $categorieId, 
+                'categorie_id' => $categorieId,
+                'fournisseur_id' => $fournisseurId, // Ajout de l'ID du fournisseur
             ];
         }
-        
+    
         $jsonContent = $this->serializer->serialize($data, 'json', [
-            'ignored_attributes' => ['relationA', 'relationB'], 
+            'ignored_attributes' => ['relationA', 'relationB'],
         ]);
-
+    
         return new JsonResponse($jsonContent, JsonResponse::HTTP_OK, [], true);
     }
     
@@ -126,7 +133,7 @@ if (isset($data['categorie_id'])) {
             'ignored_attributes' => ['relationA', 'relationB'], 
         ]);
     
-        return new JsonResponse($jsonContent, Response::HTTP_OK, [], true);
+        return new JsonResponse($jsonContent, Response::HTTP_OK, [], true,'le produit est creer avec ssss');
     }
     
     #[Route('/produits/{id}', name: 'produit_show', methods: ['GET'])]

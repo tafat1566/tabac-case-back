@@ -1,3 +1,36 @@
+api_login:
+    path: /api/login
+    controller: App\Controller\UserController::login
+    methods: ['POST']
+
+api_register:
+    path: /api/register
+    controller: App\Controller\UserController::register
+    methods: ['POST']
+
+api_user_get:
+    path: /api/user/{id}
+    controller: App\Controller\UserController::getUser
+    methods: ['GET']
+
+api_user_update:
+    path: /api/user/{id}
+    controller: App\Controller\UserController::updateUser
+    methods: ['PUT']
+
+api_users_get:
+    path: /api/users
+    controller: App\Controller\UserController::getAllUsers
+    methods: GET
+
+
+api_user_delete:
+    path: /api/user/{id}
+    controller: App\Controller\UserController::deleteUser
+    methods: ['DELETE']
+
+
+
 produit_index:
     path: /produits
     controller: 'App\Controller\ProduitController::index'
@@ -159,3 +192,27 @@ get_latest_notifications:
     path: /notifications/latest
     controller: App\Controller\NotificationController::getLatestNotifications
     methods: ['GET']
+livraisons_list:
+    path: /livraisons
+    controller: App\Controller\LivraisonController::index
+    methods: GET
+
+livraison_show:
+    path: /livraisons/{id}
+    controller: App\Controller\LivraisonController::show
+    methods: GET
+
+livraison_create:
+    path: /livraisons
+    controller: App\Controller\LivraisonController::create
+    methods: POST
+
+livraison_update:
+    path: /livraisons/{id}
+    controller: App\Controller\LivraisonController::update
+    methods: PUT
+
+livraison_delete:
+    path: /livraisons/{id}
+    controller: App\Controller\LivraisonController::delete
+    methods: DELETE

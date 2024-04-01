@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-
+use App\Repository\ProduitRepository; 
 
 
 class PaiementController extends AbstractController
@@ -207,29 +207,69 @@ public function chiffreAffaireIntervalle(Request $request): JsonResponse
         return $this->json(['chiffre_affaire' => $chiffreAffaireTotal]);
     }
 
-    /**
-     * @Route("/paiement/mode/{id}", name="modifier_paiement", methods={"PUT"})
+        /**
+     * @Route("/paiements/mode/{id}", name="modifier_paiement", methods={"PUT"})
      */
-    public function modifierPaiement(Request $request, Paiement $paiement): JsonResponse
-    {
+    public function modifierPaiement(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        PaiementRepository $paiementRepository,
+        ProduitRepository $produitRepository, // Injection du ProduitRepository
+        $id
+    ): JsonResponse {
         $data = json_decode($request->getContent(), true);
-
-        // Vérifie si les données sont valides
-        if (isset($data['montant'], $data['date_paiement'], $data['methode_paiement'])) {
-            // Mettre à jour les valeurs du paiement
-            $paiement->setMontant($data['montant']);
-            $paiement->setDatePaiement(new \DateTime($data['date_paiement']));
-            $paiement->setMethodePaiement($data['methode_paiement']);
-
-            // Enregistrer les modifications
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->flush();
-
-            return new JsonResponse(['message' => 'Paiement modifié avec succès'], JsonResponse::HTTP_OK);
+    
+        // Récupérer le paiement à modifier
+        $paiement = $paiementRepository->find($id);
+    
+        // Vérifier si le paiement existe
+        if (!$paiement) {
+            return new JsonResponse(['message' => 'Paiement non trouvé'], JsonResponse::HTTP_NOT_FOUND);
         }
-
-        return new JsonResponse(['message' => 'Données invalides'], JsonResponse::HTTP_BAD_REQUEST);
+    
+        // Mettre à jour les valeurs du paiement
+        if (isset($data['montant'])) {
+            $paiement->setMontant($data['montant']);
+        }
+    
+        if (isset($data['date_paiement'])) {
+            $paiement->setDatePaiement(new \DateTime($data['date_paiement']));
+        }
+    
+        if (isset($data['methode_paiement'])) {
+            $paiement->setMethodePaiement($data['methode_paiement']);
+        }
+    
+        if (isset($data['produits'])) {
+            // Supprimer toutes les entrées existantes pour ce paiement dans la table paiement_produit
+            foreach ($paiement->getPaiementProduits() as $paiementProduit) {
+                $entityManager->remove($paiementProduit);
+            }
+        
+            // Ajouter les nouvelles entrées dans la table paiement_produit pour les produits fournis dans la requête
+            foreach ($data['produits'] as $produitData) {
+                $produitId = $produitData['produit_id'];
+        
+                // Récupérer le produit à partir de son ID
+                $produit = $produitRepository->find($produitId);
+        
+                if ($produit) {
+                    $paiementProduit = new PaiementProduit();
+                    $paiementProduit->setPaiement($paiement);
+                    $paiementProduit->setProduit($produit);
+                    $paiementProduit->setDatedate(new \DateTime()); // Utilisez setDatedate au lieu de setDate
+                    $entityManager->persist($paiementProduit);
+                }
+                
+            }
+        }
+        
+        // Enregistrer les modifications
+        $entityManager->flush();
+    
+        return new JsonResponse(['message' => 'Paiement modifié avec succès'], JsonResponse::HTTP_OK);
     }
+    
     /**
      * @Route("/paiements/{id}", name="paiement_delete", methods={"DELETE"})
      */
